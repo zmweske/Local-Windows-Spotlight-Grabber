@@ -1,5 +1,5 @@
 # [Local Windows Spotlight Grabber](https://github.com/zmweske/Local-Windows-Spotlight-Grabber)
-This script copies the Windows 10 lock screen files to a location where you can sort out and keep your favorites
+This script copies the locally cached Windows 11 spotlight and lock screen images to a location where you can sort out and keep your favorites
 
 
 ## How to use
