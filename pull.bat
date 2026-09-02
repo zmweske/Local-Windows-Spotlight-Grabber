@@ -1,4 +1,4 @@
-: Written by zmweske
+: Written by https://github.com/zmweske/Local-Windows-Spotlight-Grabber
 @echo off
 
 REM ------------------------------------------------------------------------------
