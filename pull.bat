@@ -1,24 +1,34 @@
 : Written by https://github.com/zmweske/Local-Windows-Spotlight-Grabber
 @echo off
 
+REM %USERPROFILE%\Pictures fails sometimes when OneDrive is used, and the OneDrive folder can have inconsistent naming
+for /f "tokens=*" %%a in ('dir /b /ad "%USERPROFILE%\OneDrive*"') do set TEST_DIR=%%a
+if exist "%USERPROFILE%\%TEST_DIR%\Pictures" cd "%USERPROFILE%\%TEST_DIR%\Pictures"
+if exist "%USERPROFILE%\Pictures" cd "%USERPROFILE%\Pictures"
+REM ----- cd "[anywhere]" that you want to store the images
+
+
 REM ------------------------------------------------------------------------------
 echo Creating dirs...
 
-REM setup location
-SET "DIRECTORY=%USERPROFILE%\Pictures"
-SET "LOCATION=Lock Screens\"
-
-cd "%DIRECTORY%"
-if not exist "%LOCATION%" 		mkdir "%LOCATION%"
-if not exist "%~dp0\imgInfo.bat" 	move "%~dp0\imgInfo.bat" "%LOCATION%"
-
+REM ----- Set working dir name here
+set "LOCATION=Lock Screens\"
+if not exist "%LOCATION%" mkdir "%LOCATION%"
 cd "%LOCATION%"
+
+REM ensure imgInfo.bat is accessible
+if not exist "imgInfo.bat" (
+	if exist "%~dp0\imgInfo.bat" (copy "%~dp0\imgInfo.bat" ".\") ^
+	else (
+		echo Did not find helper script in %~dp0 nor working dir; downloading now...
+		curl -L -O https://github.com/zmweske/Local-Windows-Spotlight-Grabber/raw/refs/heads/master/imgInfo.bat
+	)
+)
 if not exist "dump\" 			mkdir "dump\"
 if not exist "horizontal\" 		mkdir "horizontal\"
 if not exist "vertical\" 		mkdir "vertical\"
 if not exist "large\"	 		mkdir "large\"
 if not exist "temp" 			mkdir "temp\"
-
 
 REM testing
 REM move "large\134321448492741245.jpeg" "temp\"
@@ -30,11 +40,13 @@ REM ----------------------------------------------------------------------------
 echo Copying to temp dir...
 
 REM copy lock screens to temp and rename
-@copy "%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets\*" "temp\" >nul 2>nul
+set "LOCK_SCREENS=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets"
+@copy "%LOCK_SCREENS%\*" "temp\" >nul 2>nul
 ren "temp\*" *.jpeg
 
 REM copy windows spotlight to temp
-for /r "%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\LocalCache\Microsoft\IrisService" %%F in (*) do (
+set "WIN_SPOTLIGHT=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\LocalCache\Microsoft\IrisService"
+for /r "%WIN_SPOTLIGHT%" %%F in (*) do (
     copy "%%F" "temp\" >nul 
 	REM 2>nul
 )
@@ -57,32 +69,18 @@ REM ----------------------------------------------------------------------------
 echo Sorting pictures by size...
 
 REM already in temp dir, only perform copy if new items exist
-for /F %%i in ('dir /b /a "."') do (
-	REM echo if you see this the folder is NOT empty
-	for /f %%f in ('dir /b .') do @(
-		REM echo %%f
-		REM for /f "delims=? tokens=2" %%a in ('call ..\toolTipInfo.bat %%f ^|find "Dimensions:"')  do (
-		@for /f "delims=" %%a in ('call ..\imgInfo.bat %%f')  do (
-			REM echo %%a
-			@if "%%a" == "1920 x 1080" @move %%f ..\horizontal\
-			@if "%%a" == "3840 x 2160" @move %%f ..\large\
-			@if "%%a" == "1080 x 1920" @move %%f ..\vertical\
-		)
+for /f %%f in ('dir /b .') do @(
+	REM echo %%f
+	@for /f "delims=" %%a in ('call ..\imgInfo.bat %%f')  do (
+		REM echo %%a
+		if "%%a" == "1920 x 1080" (move %%f ..\horizontal\) ^
+		else if "%%a" == "1080 x 1920" (move %%f ..\vertical\) ^
+		else if "%%a" == "3840 x 2160" (move %%f ..\large\) ^
+		else move %%f "..\dump\"
 	)
 )
 
-
-
-REM PAUSE
-REM ------------------------------------------------------------------------------
-echo Moving leftovers to dump dir...
-
 cd ..
-for /F %%i in ('dir /b /a "temp"') do (
-	@move "temp\%%i" "dump\"
-)
-
 rmdir "temp"
-REM CALL explorer.exe .
 echo Done
-
+REM PAUSE
