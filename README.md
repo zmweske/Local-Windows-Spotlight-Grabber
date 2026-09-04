@@ -3,9 +3,9 @@ This script copies the locally cached Windows 11 spotlight and lock screen image
 
 
 ## How to use
-1. Download `pull.bat` and `imgInfo.bat`, or clone repository. 
-2. Optional: Change setup location inside of `pull.bat`. It is set as the variable `DIRECTORY` and the default is `"%USERPROFILE%\Pictures"`. Additionally, change the `LOCATION` variable which is by default set to `"Lock Screens\"`. This will set up everything in a "Lock Screens" folder in your user's Pictures directory. 
-3. Run `pull.bat` from anywhere. It will use the configured setup location. `imgInfo.bat` should be inside the setup `LOCATION` if you downloaded it manually. The script will try to move it into the `LOCATION` directory automatically. 
+1. Download `pull.bat` or clone repository. Main script will now download `imgInfo.bat` if it is not found. 
+2. Optional: Change setup location inside of `pull.bat` by editing line 8. Default is your `User\Pictures\` directory, and it should work even if you use OneDrive. Additionally, change the `LOCATION` variable which is by default set to `"Lock Screens\"`. This will set up everything in a "Lock Screens" folder in your user's Pictures directory. 
+3. Run `pull.bat` from anywhere. ~~It will use the configured setup location. `imgInfo.bat` should be inside the setup `LOCATION` if you downloaded it manually. The script will try to move it into the `LOCATION` directory automatically.~~
 4. Open the `dump\` folder and delete any advertisement/spam images that Windows downloaded and sort out favorite images. 
 5. Remaining images inside `dump\`, `horizontal\`, `vertical\`, and `large\` can be deleted or moved. 
 - It is recommended to `SHIFT + DELETE` unwanted images. It deletes them permanently and will reduce disk usage. 
@@ -29,7 +29,7 @@ empty folders use to store 4k (3840x2160) images
 where all of the processed images are placed, ready for manual sorting  
 
 - `trash.txt`
-a list of already processed images to reduce the likelihood of getting duplicates  
+a list of already processed images to reduce the likelihood of getting duplicates (still not impossible, check by sorting image directories by size)
 
 - `temp\`
 to be removed after operations, a temp to convert image files  
@@ -43,3 +43,5 @@ to be removed after operations, a temp to convert image files
 - [x] Sort images by vertical vs horizontal
 - [x] added Windows Desktop Spotlight copying functionality
 - [x] support for sorting 4k images
+- [x] automatically download imgInfo.bat if unable to find
+- [x] works with OneDrive user directory structure
